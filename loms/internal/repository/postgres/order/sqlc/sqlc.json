@@ -1,0 +1,15 @@
+{
+  "version": "2",
+  "sql": [{
+    "engine": "postgresql",
+    "schema": "../../migrations",
+    "gen": {
+      "go": {
+        "package": "sqlc",
+        "out": "../sqlc",
+        "sql_package": "pgx/v5"
+      }
+    },
+    "queries": "/queries"
+  }]
+}

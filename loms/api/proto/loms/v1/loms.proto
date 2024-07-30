@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package orders;
+
+option go_package = "github.com/BruteMors/marketplace-service/loms/pkg/api/loms/v1;loms";
+
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "LOMS (Logistics and Order Management System) service";
+    version: "1.0.0";
+  };
+  host: "localhost:8082";
+  schemes: HTTP;
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+
+service Orders {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+        description: "Service for managing orders"
+    };
+
+    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {
+        option (google.api.http) = {
+            post: "/v1/order/create"
+            body: "*"
+        };
+    }
+
+    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse) {
+        option (google.api.http) = {
+            post: "/v1/order/info"
+            body: "*"
+        };
+    }
+
+    rpc OrderPay(OrderPayRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/order/pay"
+            body: "*"
+        };
+    }
+
+    rpc OrderCancel(OrderCancelRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/order/cancel"
+            body: "*"
+        };
+    }
+}
+
+service Stock {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+        description: "Service for managing stock"
+    };
+
+    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse) {
+        option (google.api.http) = {
+            post: "/v1/stock/info"
+            body: "*"
+        };
+    }
+}
+
+message OrderCreateRequest {
+    int64 user = 1 [(validate.rules).int64 = {gte: 0}];
+    repeated OrderItem items = 2 [(validate.rules).repeated = {min_items: 1}];
+}
+
+message OrderCreateResponse {
+    int64 order_id = 1;
+}
+
+message OrderInfoRequest {
+    int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message OrderInfoResponse {
+    OrderStatus status = 1;
+    int64 user = 2;
+    repeated OrderItem items = 3;
+}
+
+message OrderPayRequest {
+    int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message OrderCancelRequest {
+    int64 order_id = 1 [(validate.rules).int64.gte = 0];
+}
+
+message OrderItem {
+    uint32 sku = 1 [(validate.rules).uint32.gt = 0];
+    uint32 count = 2 [(validate.rules).uint32.gt = 0];
+}
+
+enum OrderStatus {
+    NEW = 0;
+    AWAITING_PAYMENT = 1;
+    FAILED = 2;
+    PAYED = 3;
+    CANCELLED = 4;
+}
+
+message StocksInfoRequest {
+    uint32 sku = 1 [(validate.rules).uint32.gt = 0];
+}
+
+message StocksInfoResponse {
+    uint64 count = 1;
+}
